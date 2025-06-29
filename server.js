@@ -1,16 +1,20 @@
-// server.js
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const { Server } = require('socket.io');
+const io = new Server(http);
 
-// 靜態檔案提供
+const users = {}; // 追蹤連線中的使用者
+
+// 靜態檔案放在 public 資料夾
 app.use(express.static('public'));
 
-// 使用者連線
-io.on('connection', socket => {
-const users = {}; // 追蹤連線中的使用者（socket.id → 使用者名稱）
+// 首頁導向 login.html
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/login.html');
+});
 
+// 使用者連線
 io.on('connection', socket => {
   console.log('使用者已連線');
 
@@ -36,10 +40,9 @@ io.on('connection', socket => {
     }
   });
 });
-});
 
-// 啟動伺服器
-const PORT = 3000;
+// 如果要在 Render 上部署，必須用 process.env.PORT
+const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
-  console.log(`伺服器運行中：http://localhost:${PORT}`);
+  console.log(`伺服器已啟動在 port ${PORT}`);
 });
