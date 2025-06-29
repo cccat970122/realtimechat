@@ -79,6 +79,8 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+
+
   const socket = io(); // ✅ 先建立 socket 連線
   const myName = localStorage.getItem("chat_user") || "匿名";
 
@@ -89,6 +91,11 @@
   socket.on('user-status', data => {
     const msg = `${data.name} ${data.status === 'online' ? '上線了' : '離線了'}`;
     addMessage(msg, 'status');
+  });
+  socket.on('chat history', history => {
+    history.forEach(data => {
+      addMessage(`${data.name}：${data.text}`, 'other');
+    });
   });
 
   function sendMessage() {
