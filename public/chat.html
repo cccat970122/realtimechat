@@ -78,47 +78,47 @@
   </div>
 
 <script src="/socket.io/socket.io.js"></script>
-  <script>
-    // 連線後告訴伺服器我是誰
-    socket.emit('login', myName);
+<script>
+  const socket = io(); // ✅ 先建立 socket 連線
+  const myName = localStorage.getItem("chat_user") || "匿名";
 
-    // 接收上線/離線通知
-    socket.on('user-status', data => {
+  // 🔁 告訴伺服器我登入了
+  socket.emit('login', myName);
+
+  // ✅ 接收上線/離線通知
+  socket.on('user-status', data => {
     const msg = `${data.name} ${data.status === 'online' ? '上線了' : '離線了'}`;
     addMessage(msg, 'status');
-    });
-    const socket = io();
+  });
 
-    const myName = localStorage.getItem("chat_user") || "匿名";
+  function sendMessage() {
+    const input = document.getElementById("msgInput");
+    const msg = input.value.trim();
+    if (!msg) return;
 
-    function sendMessage() {
-      const input = document.getElementById("msgInput");
-      const msg = input.value.trim();
-      if (!msg) return;
+    // 顯示自己訊息
+    addMessage(`${myName}：${msg}`, 'me');
 
-      // 顯示自己訊息
-      addMessage(`${myName}：${msg}`, 'me');
+    // 傳送給伺服器
+    socket.emit('chat message', { name: myName, text: msg });
 
-      // 傳送給伺服器
-      socket.emit('chat message', { name: myName, text: msg });
+    input.value = "";
+  }
 
-      input.value = "";
-    }
+  function addMessage(text, type) {
+    const messages = document.getElementById("messages");
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "message " + type;
+    msgDiv.innerText = text;
+    messages.appendChild(msgDiv);
+    messages.scrollTop = messages.scrollHeight;
+  }
 
-    function addMessage(text, type) {
-      const messages = document.getElementById("messages");
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "message " + type;
-      msgDiv.innerText = text;
-      messages.appendChild(msgDiv);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    // 接收對方訊息
-    socket.on('chat message', data => {
-      addMessage(`${data.name}：${data.text}`, 'other');
-    });
-  </script>
+  // ✅ 接收對方訊息
+  socket.on('chat message', data => {
+    addMessage(`${data.name}：${data.text}`, 'other');
+  });
+</script>
   
 </body>
 </html>
