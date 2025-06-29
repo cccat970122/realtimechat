@@ -44,5 +44,5 @@ io.on('connection', socket => {
 // 如果要在 Render 上部署，必須用 process.env.PORT
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
-  console.log(`https://scarlett-5lc0.onrender.com`);
+  console.log(`伺服器已啟動在 port ${PORT}`);
 });
