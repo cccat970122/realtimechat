@@ -10,12 +10,10 @@ const users = {}; // 紀錄連線使用者
 // 連接 MongoDB
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://gary8662009:G9IfSpAH5DYTEQb5@cluster0.xlr3vi8.mongodb.net/chatapp?retryWrites=true&w=majority';
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ 已連接到 MongoDB'))
-.catch(err => console.error('❌ MongoDB 連接失敗', err));
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('✅ 已連接到 MongoDB'))
+  .catch(err => console.error('❌ MongoDB 連接失敗', err));
+
 
 // 定義訊息 Schema 與 Model
 const MessageSchema = new mongoose.Schema({
@@ -50,13 +48,14 @@ io.on('connection', socket => {
   });
 
   socket.on('chat message', async data => {
-    console.log('收到訊息：', data);
-    // 儲存到資料庫
+  try {
     await Message.create(data);
-
-    // 廣播給其他人
     socket.broadcast.emit('chat message', data);
-  });
+  } catch (err) {
+    console.error('訊息存取失敗:', err);
+  }
+});
+
 
   socket.on('disconnect', () => {
     const name = users[socket.id];
